@@ -1,0 +1,24 @@
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment
+myenv/
+.env/
+
+# VSCode settings
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Artifacts
+Test/
+meetings/
+
+# System files
+.DS_Store
+Thumbs.db
+
