@@ -36,6 +36,12 @@ python get_meetings_files.py <start_year> <start_month> <end_year> <end_month>
 
 Replace `<start_year>`, `<start_month>`, `<end_year>`, and `<end_month>` with the desired date range.
 
+PDFs will be downloaded to meetings/ folder with a structure of {year}/{month}/{day}-{meeting-name}/
+
+All files with Agenda or Minutes in their name will be downloaded.
+
+A meeting_details.json will also be generated with some basic details for reference.
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
