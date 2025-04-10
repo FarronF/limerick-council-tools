@@ -26,7 +26,7 @@ def get_calendar_html(response):
     parsed_response = json.loads(response)
     return parsed_response[3]["data"]
     
-def get_public_meetings(html):
+def get_public_meetings(html, filter_keywords=None):
     # Parse the HTML content with Beautiful Soup
     soup = BeautifulSoup(html, "html.parser")
     
@@ -42,18 +42,17 @@ def get_public_meetings(html):
         time_tag = item.find('time', class_='datetime')
 
         if link_tag and time_tag:
-            meeting_details.append({
-                'meeting_name': link_tag.contents[0].strip(),
-                'href': f"https://www.limerick.ie{link_tag['href']}",
-                'datetime': datetime.strptime(time_tag['datetime'], "%Y-%m-%dT%H:%M:%SZ")
-            })
-            print(link_tag.contents[0], link_tag['href'], time_tag['datetime'])
+            meeting_name = link_tag.contents[0].strip()
+            if not filter_keywords or any(keyword.lower() in meeting_name.lower() for keyword in filter_keywords):
+                meeting_details.append({
+                    'meeting_name': meeting_name,
+                    'href': f"https://www.limerick.ie{link_tag['href']}",
+                    'datetime': datetime.strptime(time_tag['datetime'], "%Y-%m-%dT%H:%M:%SZ")
+                })
+                print(meeting_name, link_tag['href'], time_tag['datetime'])
     
-    #print(links)
-    #for link in links:
-        #print(link.contents[0], link.get('href'))
     return meeting_details
-def handle_meetings(meetings):
+def handle_meetings(meetings, file_filters=None):
     
     prefix = "https://www.limerick.ie"
     for meeting in meetings:
@@ -81,12 +80,12 @@ def handle_meetings(meetings):
         soup = BeautifulSoup(response.text, "html.parser")
         
         links = soup.find_all(
-        'a',
-            string=lambda text: text and any(keyword in text.strip().lower() for keyword in ["minutes", "agenda"]),
+            'a',
+            string=lambda text: text and (not file_filters or any(keyword in text.strip().lower() for keyword in file_filters)),
+            href=lambda href: href and href.endswith(".pdf"),
         )
         
-        for link in links:
-            print(link)
+        print(f"Found {len(links)} PDF links for {meeting['meeting_name']}:")
         
         download_pdfs_to_folder(links, folder_path)
 
@@ -127,16 +126,19 @@ def download_pdfs_to_folder(links, folder_path):
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Download council meeting minutes PDFs.")
-    parser.add_argument("--start_year", type=int, default=2014, help="Start year (e.g., 2023)")
-    parser.add_argument("--start_month", type=int, default=1, help="Start month (1-12)")
-    parser.add_argument("--end_year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
-    parser.add_argument("--end_month", type=int, default=datetime.now().month, help="End month (1-12)")
-    parser.add_argument("--filter", type=str, default="", help="Filter meetings by name (case insensitive)")
+    parser.add_argument("--start-year", type=int, default=2014, help="Start year (e.g., 2023)")
+    parser.add_argument("--start-month", type=int, default=1, help="Start month (1-12)")
+    parser.add_argument("--end-year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
+    parser.add_argument("--end-month", type=int, default=datetime.now().month, help="End month (1-12)")
+    parser.add_argument("--meeting-filter", nargs='+', type=str, default=None, help="Filter meetings by names (case insensitive, e.g., 'council budget')")
+    parser.add_argument("--file-filter", nargs='+', type=str, default=["agenda", "minutes"], help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter None' to disable filtering.")
     args = parser.parse_args()
 
     print(f"Fetching meeting minutes from {args.start_year}-{args.start_month} to {args.end_year}-{args.end_month}...")
-    if args.filter:
-        print(f"Filtering meetings by name containing: '{args.filter}' (case insensitive)")
+    if args.meeting_filter:
+        print(f"Filtering meetings by name containing: '{args.meeting_filter}' (case insensitive)")
+    if args.file_filter:
+        print(f"Filtering files by name containing: '{args.file_filter}' (case insensitive)")
 
     # Generate a list of months between start and end dates
     start_date = datetime(args.start_year, args.start_month, 1)
@@ -152,14 +154,10 @@ if __name__ == "__main__":
 
         if content:
             html = get_calendar_html(content)
-            meetings = get_public_meetings(html)
-
-            # Apply the filter
-            if args.filter:
-                meetings = [meeting for meeting in meetings if args.filter.lower() in meeting['meeting_name'].lower()]
-
+            meetings = get_public_meetings(html, args.meeting_filter)
+            
             print(f"Found {len(meetings)} meetings for {year}-{month:02d}.")
-            handle_meetings(meetings)
+            handle_meetings(meetings, args.file_filter)
 
         # Move to the next month
         current_date += timedelta(days=31)
