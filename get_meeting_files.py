@@ -89,10 +89,7 @@ def handle_meetings(meetings):
             print(link)
         
         download_pdfs_to_folder(links, folder_path)
-        # Return the content as text
-        #print(response.text)
-        #with open(f"{link.contents[0]}.html", "w", encoding="utf-8") as file:
-            #file.write(response.text)
+
 
 def download_pdfs_to_folder(links, folder_path):
     # Ensure the folder exists
@@ -134,9 +131,13 @@ if __name__ == "__main__":
     parser.add_argument("--start_month", type=int, default=1, help="Start month (1-12)")
     parser.add_argument("--end_year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
     parser.add_argument("--end_month", type=int, default=datetime.now().month, help="End month (1-12)")
+    parser.add_argument("--filter", type=str, default="", help="Filter meetings by name (case insensitive)")
     args = parser.parse_args()
 
     print(f"Fetching meeting minutes from {args.start_year}-{args.start_month} to {args.end_year}-{args.end_month}...")
+    if args.filter:
+        print(f"Filtering meetings by name containing: '{args.filter}' (case insensitive)")
+
     # Generate a list of months between start and end dates
     start_date = datetime(args.start_year, args.start_month, 1)
     end_date = datetime(args.end_year, args.end_month, 1)
@@ -152,21 +153,14 @@ if __name__ == "__main__":
         if content:
             html = get_calendar_html(content)
             meetings = get_public_meetings(html)
+
+            # Apply the filter
+            if args.filter:
+                meetings = [meeting for meeting in meetings if args.filter.lower() in meeting['meeting_name'].lower()]
+
             print(f"Found {len(meetings)} meetings for {year}-{month:02d}.")
             handle_meetings(meetings)
 
         # Move to the next month
-        current_date += timedelta(days=32)
+        current_date += timedelta(days=31)
         current_date = current_date.replace(day=1)
-    # url = "https://www.limerick.ie/views/ajax?view_name=council_meetings_calendar&view_display_id=page_month&view_args=202411"
-    # content = fetch_web_content(url)
-    
-    # if content:
-    #     # Save to a file for inspection (optional)
-    #     html = get_calendar_html(content)
-    #     links = get_public_meetings(html)
-    #     download_minutes_pdfs(links)
-        #with open("web_content.txt", "w", encoding="utf-8") as file:
-            #file.write(content)
-        
-        #print("Web content fetched successfully. Saved to 'web_content.txt'.")
