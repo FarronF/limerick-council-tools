@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
+# Record the script start time
+script_start_time = datetime.now()
     
 def fetch_web_content(url):
     try:
@@ -120,6 +121,18 @@ def download_pdfs_to_folder(links, folder_path):
             print(f"Downloaded: {file_path}")
         except Exception as e:
             print(f"\033[91m❌ Failed to download {url}: {e}\033[0m")
+            log_failed_download(folder_path, url)
+
+
+# Function to log failed downloads
+def log_failed_download(folder_path, failed_download):
+    # Generate the log file name based on the script start time
+    log_file_name = f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}_failed_downloads.txt"
+    log_file_path = os.path.join(".log", log_file_name)
+    
+    os.makedirs(".log", exist_ok=True)  # Ensure the logs folder exists
+    with open(log_file_path, "a") as failed_file:
+        failed_file.write(f"{folder_path}, {failed_download}\n")
 
 
 # Example usage
@@ -131,8 +144,12 @@ if __name__ == "__main__":
     parser.add_argument("--end-year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
     parser.add_argument("--end-month", type=int, default=datetime.now().month, help="End month (1-12)")
     parser.add_argument("--meeting-filter", nargs='+', type=str, default=None, help="Filter meetings by names (case insensitive, e.g., 'council budget')")
-    parser.add_argument("--file-filter", nargs='+', type=str, default=["agenda", "minutes"], help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter None' to disable filtering.")
+    parser.add_argument("--file-filter", nargs='*', type=str, default=["agenda", "minutes"], help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter' with no arguments to disable filtering.")
     args = parser.parse_args()
+
+    # Handle disabling file filter
+    if not args.file_filter:  # If file-filter is provided with no arguments
+        args.file_filter = None
 
     print(f"Fetching meeting minutes from {args.start_year}-{args.start_month} to {args.end_year}-{args.end_month}...")
     if args.meeting_filter:
