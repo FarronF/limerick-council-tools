@@ -85,6 +85,8 @@ def handle_meetings(meetings):
             string=lambda text: text and any(keyword in text.strip().lower() for keyword in ["minutes", "agenda"]),
         )
         
+        for link in links:
+            print(link)
         
         download_pdfs_to_folder(links, folder_path)
         # Return the content as text
@@ -110,6 +112,7 @@ def download_pdfs_to_folder(links, folder_path):
         
         try:
             # Download the PDF
+            print(f"Downloading: {url} to {file_path}")
             response = requests.get(url, stream=True, verify=False)
             response.raise_for_status()  # Raise an error for bad HTTP responses
             
@@ -120,19 +123,20 @@ def download_pdfs_to_folder(links, folder_path):
             
             print(f"Downloaded: {file_path}")
         except Exception as e:
-            print(f"Failed to download {url}: {e}")
+            print(f"\033[91m❌ Failed to download {url}: {e}\033[0m")
 
 
 # Example usage
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Download council meeting minutes PDFs.")
-    parser.add_argument("start_year", type=int, help="Start year (e.g., 2023)")
-    parser.add_argument("start_month", type=int, help="Start month (1-12)")
-    parser.add_argument("end_year", type=int, help="End year (e.g., 2024)")
-    parser.add_argument("end_month", type=int, help="End month (1-12)")
+    parser.add_argument("--start_year", type=int, default=2014, help="Start year (e.g., 2023)")
+    parser.add_argument("--start_month", type=int, default=1, help="Start month (1-12)")
+    parser.add_argument("--end_year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
+    parser.add_argument("--end_month", type=int, default=datetime.now().month, help="End month (1-12)")
     args = parser.parse_args()
 
+    print(f"Fetching meeting minutes from {args.start_year}-{args.start_month} to {args.end_year}-{args.end_month}...")
     # Generate a list of months between start and end dates
     start_date = datetime(args.start_year, args.start_month, 1)
     end_date = datetime(args.end_year, args.end_month, 1)
@@ -142,11 +146,13 @@ if __name__ == "__main__":
         year = current_date.year
         month = current_date.month
         url = f"https://www.limerick.ie/views/ajax?view_name=council_meetings_calendar&view_display_id=page_month&view_args={year}{month:02d}"
+        print(f"Fetching data for {year}-{month:02d}...")
         content = fetch_web_content(url)
 
         if content:
             html = get_calendar_html(content)
             meetings = get_public_meetings(html)
+            print(f"Found {len(meetings)} meetings for {year}-{month:02d}.")
             handle_meetings(meetings)
 
         # Move to the next month
