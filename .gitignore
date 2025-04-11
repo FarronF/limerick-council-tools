@@ -15,8 +15,7 @@ myenv/
 *.tmp
 
 # Artifacts
-Test/
-meetings/
+data/
 
 # System files
 .DS_Store
