@@ -3,14 +3,21 @@ import glob
 import fitz
 import json
 from markdownify import markdownify as md
-import pdfplumber
-import pypandoc
-from marker.converters.pdf import PdfConverter
-from marker.models import create_model_dict
-from marker.output import text_from_rendered
-from marker.config.parser import ConfigParser
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="pdfminer")
+import tesserocr
+# from tesserocr import PyTessBaseAPI, tesseract_version, get_languages
+#import pymupdf4llm
+from PIL import Image
+# import pytesseract
+# from paddleocr import PaddleOCR,draw_ocr
+# from numpy import asarray
+# import pdfplumber
+# import pypandoc
+# from marker.converters.pdf import PdfConverter
+# from marker.models import create_model_dict
+# from marker.output import text_from_rendered
+# from marker.config.parser import ConfigParser
+# import warnings
+# warnings.filterwarnings("ignore", category=UserWarning, module="pdfminer")
 # import torch
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -61,6 +68,9 @@ def process_meeting(meeting_folder, output_folder):
             process_pdf_with_all_methods(pdf_file, output_meeting_folder)
 
 def process_pdf_with_all_methods(pdf_path, output_folder):
+    print(tesserocr.tesseract_version())  # print tesseract-ocr version
+    print(tesserocr.get_languages())  # prints tessdata path and list of available languages
+    
     """Processes a PDF with all methods and saves Markdown files."""
     try:
         # Method 1: pdfplumber
@@ -77,19 +87,19 @@ def process_pdf_with_all_methods(pdf_path, output_folder):
         # # except Exception as e:
         # #     print(f"Error processing {pdf_path} with pypandoc: {e}")
 
-        # # Method 3: markdownify with PyMuPDF
-        # try:
-        #     markdown_output = process_with_markdownify(pdf_path)
-        #     save_markdown(markdown_output, pdf_path, output_folder, "markdownify")
-        # except Exception as e:
-        #     print(f"Error processing {pdf_path} with markdownify: {e}")
-
-        # Method 4: marker-pdf
+        #Method 3: markdownify with PyMuPDF
         try:
-            markdown_output = process_with_marker_pdf(pdf_path)
-            save_markdown(markdown_output, pdf_path, output_folder, "marker-pdf2")
+            markdown_output = process_with_markdownify(pdf_path)
+            save_markdown(markdown_output, pdf_path, output_folder, "markdownify")
         except Exception as e:
-            print(f"Error processing {pdf_path} with marker-pdf: {e}")
+            print(f"Error processing {pdf_path} with markdownify: {e}")
+
+        # # Method 4: marker-pdf
+        # try:
+        #     markdown_output = process_with_marker_pdf(pdf_path)
+        #     save_markdown(markdown_output, pdf_path, output_folder, "marker-pdf2")
+        # except Exception as e:
+        #     print(f"Error processing {pdf_path} with marker-pdf: {e}")
 
         # # Method 5: markdrop
         # try:
@@ -97,6 +107,20 @@ def process_pdf_with_all_methods(pdf_path, output_folder):
         #     save_markdown(markdown_output, pdf_path, output_folder, "markdrop")
         # except Exception as e:
         #     print(f"Error processing {pdf_path} with markdrop: {e}")
+
+        # Method 6: fitz (PyMuPDF)
+        # try:
+        #     markdown_output = process_with_fitz(pdf_path)
+        #     save_markdown(markdown_output, pdf_path, output_folder, "fitz")
+        # except Exception as e:
+        #     print(f"Error processing {pdf_path} with fitz: {e}")
+
+        # Method 7: pymupdf4llm
+        # try:
+        #     markdown_output = pymupdf4llm.to_markdown(pdf_path, write_images=True)
+        #     save_markdown(markdown_output, pdf_path, output_folder, "pymupdf4llm")
+        # except Exception as e:
+        #     print(f"Error processing {pdf_path} with pymupdf4llm: {e}")
 
     except Exception as e:
         print(f"Error processing {pdf_path}: {e}")
@@ -111,12 +135,35 @@ def process_with_pdfplumber(pdf_path):
     return "\n\n".join(markdown_lines)
 
 def process_with_markdownify(pdf_path):
-    """Extracts text from a PDF using PyMuPDF and converts it to Markdown with markdownify."""
+    """Extracts text from a PDF using PyMuPDF and converts it to Markdown with markdownify.
+    Includes OCR for scanned PDFs."""
     doc = fitz.open(pdf_path)
     markdown_output = ""
-    for page in doc:
-        html_text = page.get_text("html")  # Extract as HTML
-        markdown_output += md(html_text)
+
+    for page_num in range(len(doc)):
+        page = doc[page_num]
+        
+        if not page.get_text().strip():  # If no text is found, use OCR
+            pix = page.get_pixmap()  # Render page as an image
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            
+            # ocr_model = PaddleOCR(lang="en")
+            # cropped_img = img.crop((xmin,ymin,xmax,ymax))
+            # numpydata = asarray(cropped_img)
+
+            # result = ocr.ocr(numpydata, cls=True)
+            
+            img = img.resize((pix.width * 3, pix.height * 3), Image.Resampling.LANCZOS)  # Resize image to 3x the size
+            # ocr_text = pytesseract.image_to_string(img)
+            # markdown_output += f"### Scanned page, text may contain errors \n{ocr_text}\n"
+            
+            ocr_text = tesserocr.image_to_text(img)
+            ## markdown_output += ocr_text
+            markdown_output += f"*<small>Scanned page, text may contain errors. See original file for clarity</small>* \n{ocr_text}\n"
+        else:
+            html_text = page.get_text("html")  # Extract as HTML
+            markdown_output += md(html_text)
+        markdown_output += "---\n"
     return markdown_output
 
 def process_with_marker_pdf(pdf_path):
@@ -139,6 +186,22 @@ def process_with_markdrop(pdf_path):
     """Extracts text from a PDF using markdrop and converts it to Markdown."""
     markdrop = MarkDrop(pdf_path)
     return markdrop.to_markdown()
+
+def process_with_fitz(pdf_path):
+    """Extracts text from a PDF using fitz (PyMuPDF) and formats it as Markdown."""
+    import fitz  # PyMuPDF
+    markdown_lines = []
+    try:
+        pdf_document = fitz.open(pdf_path)
+        for page_num in range(len(pdf_document)):
+            page = pdf_document[page_num]
+            text = page.get_text("text")  # Extract text from the page
+            markdown_lines.append(f"# Page {page_num + 1}\n{text}\n")
+        pdf_document.close()
+    except Exception as e:
+        print(f"Error extracting text with fitz: {e}")
+        raise
+    return "\n".join(markdown_lines)
 
 def save_markdown(markdown_content, pdf_path, output_folder, method_suffix):
     """Saves the Markdown content to a file with a method-specific suffix."""
