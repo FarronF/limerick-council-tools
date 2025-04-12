@@ -173,3 +173,4 @@ def log_ocr_usage(pdf_path):
 
 input_folder = "../data/meetings/downloaded"
 output_folder = "../data/meetings/processed"
+process_meetings(input_folder, output_folder)
