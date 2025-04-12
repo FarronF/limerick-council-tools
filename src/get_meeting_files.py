@@ -61,12 +61,7 @@ def handle_meetings(meetings, file_filters=None):
         folder_name = re.sub(r'[\\/*?:"<>|]', "_", meeting['meeting_name'])
         folder_path = f"../data/meetings/downloaded/{datetime.year}/{datetime.month:02d}/{datetime.day:02d}-{folder_name}"
         os.makedirs(folder_path, exist_ok=True)
-        # Create a markdown file for the meeting
-        # markdown_file_path = os.path.join(folder_path, "README.md")
-        # with open(markdown_file_path, "w", encoding="utf-8") as md_file:
-        #     md_file.write(f"# Meeting Details\n\n")
-        #     md_file.write(f"- [{meeting['meeting_name']}]({prefix}{meeting['href']})\n")
-        # Save meeting details to a JSON file
+        
         json_file_path = os.path.join(folder_path, "meeting_details.json")
         with open(json_file_path, "w", encoding="utf-8") as json_file:
             json.dump(meeting, json_file, indent=4, default=str)
