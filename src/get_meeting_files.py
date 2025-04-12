@@ -84,6 +84,7 @@ def handle_meetings(meetings, file_filters=None):
             file = {
                 'display_text': display_text,
                 'file_name': file_name,
+                'url': link.get('href'),
                 'downloaded': False
             }
             
