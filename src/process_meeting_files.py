@@ -7,6 +7,7 @@ from PIL import Image
 import pytesseract
 from datetime import datetime
 import re
+from urllib.parse import quote  # Add this import at the top of the file
 
 # Record the script start time
 script_start_time = datetime.now()
@@ -19,6 +20,9 @@ README_TEMPLATE = """# Meeting Details
 **Date and Time:** {datetime}
 
 **[Link to Meeting]({href})**
+
+Files: 
+
 """
 
 def process_meetings(input_folder, output_folder):
@@ -30,6 +34,7 @@ def process_meetings(input_folder, output_folder):
         os.makedirs(output_folder)
 
     for year_folder in sorted(os.listdir(input_folder)):
+        
         year_path = os.path.join(input_folder, year_folder)
         if os.path.isdir(year_path):
             for month_folder in sorted(os.listdir(year_path)):
@@ -53,31 +58,62 @@ def process_meeting(meeting_folder, output_folder):
         if not os.path.exists(output_meeting_folder):
             os.makedirs(output_meeting_folder)
 
-        # Create a README.md file for the meeting
-        readme_path = os.path.join(output_meeting_folder, "README.md")
-        with open(readme_path, "w", encoding="utf-8") as readme_file:
-            readme_content = README_TEMPLATE.format(
-                meeting_name=meeting_details["meeting_name"],
-                datetime=meeting_details["datetime"],
-                href=meeting_details["href"]
-            )
-            readme_file.write(readme_content)
+        # Create a README.md file content for the meeting
+        readme_content = README_TEMPLATE.format(
+            meeting_name=meeting_details["meeting_name"],
+            datetime=meeting_details["datetime"],
+            href=meeting_details["href"]
+        )
+        
 
+        files_info = meeting_details.get("files", [])
+        if not files_info:
+            readme_content += "No files available for this meeting."
+    
         # Process PDFs in the meeting folder
-        for pdf_file in glob.glob(os.path.join(meeting_folder, "*.pdf")):
-            process_pdf(pdf_file, output_meeting_folder)
-
-def process_pdf(pdf_path, output_folder):
+        for file_info in files_info:
+            file_name = file_info.get("file_name")
+            display_text = file_info.get("display_text")
+            file_url = file_info.get("url", "#")
+            downloaded = file_info.get("downloaded")
+            
+            processed = False
+            md_file_name = None
+            
+            if downloaded:
+                pdf_file_path = os.path.join(meeting_folder, file_name)
+                if os.path.exists(pdf_file_path):
+                    processed = process_pdf(pdf_file_path, output_meeting_folder, file_url)
+                    md_file_name = f"{os.path.splitext(os.path.basename(pdf_file_path))[0]}.md"
+                else:
+                    print(f"❌ File {pdf_file_path} not found, skipping PDF processing.")
+            
+            readme_content += f"{file_name} - [Original file]({file_url})"
+            if processed and md_file_name:
+                readme_content += f" - [Extracted text](./{quote(md_file_name)})"
+            else:
+                readme_content += " - Text not extracted"
+            readme_content += "\n\n"
+            
+            readme_path = os.path.join(output_meeting_folder, "README.md")
+            with open(readme_path, "w", encoding="utf-8") as readme_file:
+                readme_file.write(readme_content)
+            
+def process_pdf(pdf_path, output_folder, original_url):
     """Processes a PDF with all methods and saves Markdown files."""
     print(f"📄 Processing PDF: {os.path.basename(pdf_path)}")
     try:
         markdown_output = process_with_markdownify(pdf_path)
         if markdown_output:
+            markdown_output = f"[Original file]({original_url})\n\n---\n" + markdown_output
             save_markdown(markdown_output, pdf_path, output_folder)
         else:
             print(f"No content extracted from {pdf_path}.")
+            return False
     except Exception as e:
         print(f"Error processing {pdf_path} with markdownify: {e}")
+        return False
+    return True
 
 
     
