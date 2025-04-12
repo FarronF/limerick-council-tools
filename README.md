@@ -17,13 +17,39 @@ This repository contains tools and utilities designed to assist with tasks relat
     cd limerick-council-tools
     ```
 
-### Prepare Dev Environment
-* install python 3
-* apt-get install python3-venv
+## Prepare Development Environment
 
-### Create and activate Virtual Environment with dependencies
+1. Install Python 3:
+    ```bash
+    sudo apt-get install python3
+    ```
+
+2. Install `python3-venv`:
+    ```bash
+    sudo apt-get install python3-venv
+    ```
+
+## Create and Activate Virtual Environment
+
+1. Create a virtual environment:
+    ```bash
     python3 -m venv .env
-    .env/Scripts/activate[.bat|ps1]
+    ```
+
+2. Activate the virtual environment:
+    - On Linux/MacOS:
+        ```bash
+        source .env/bin/activate
+        ```
+    - On Windows:
+        ```bash
+        .env\Scripts\activate
+        ```
+
+3. Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 ### Downloading agendas and minutes

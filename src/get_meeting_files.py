@@ -59,14 +59,9 @@ def handle_meetings(meetings, file_filters=None):
     for meeting in meetings:
         datetime = meeting['datetime']
         folder_name = re.sub(r'[\\/*?:"<>|]', "_", meeting['meeting_name'])
-        folder_path = f"meetings/{datetime.year}/{datetime.month:02d}/{datetime.day:02d}-{folder_name}"
+        folder_path = f"../data/meetings/downloaded/{datetime.year}/{datetime.month:02d}/{datetime.day:02d}-{folder_name}"
         os.makedirs(folder_path, exist_ok=True)
-        # Create a markdown file for the meeting
-        # markdown_file_path = os.path.join(folder_path, "README.md")
-        # with open(markdown_file_path, "w", encoding="utf-8") as md_file:
-        #     md_file.write(f"# Meeting Details\n\n")
-        #     md_file.write(f"- [{meeting['meeting_name']}]({prefix}{meeting['href']})\n")
-        # Save meeting details to a JSON file
+        
         json_file_path = os.path.join(folder_path, "meeting_details.json")
         with open(json_file_path, "w", encoding="utf-8") as json_file:
             json.dump(meeting, json_file, indent=4, default=str)
@@ -128,7 +123,7 @@ def download_pdfs_to_folder(links, folder_path):
 def log_failed_download(folder_path, failed_download):
     # Generate the log file name based on the script start time
     log_file_name = f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}_failed_downloads.txt"
-    log_file_path = os.path.join(".log", log_file_name)
+    log_file_path = os.path.join("../.log", log_file_name)
     
     os.makedirs(".log", exist_ok=True)  # Ensure the logs folder exists
     with open(log_file_path, "a") as failed_file:
