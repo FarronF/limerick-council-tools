@@ -90,7 +90,6 @@ def handle_meetings(meetings, file_filters=None):
             
             if not file_filters or any(filter_word.lower() in file_name.lower() for filter_word in file_filters):
                 download_success = download_pdf_to_folder(link, folder_path)
-                print(f"FAZ File: {file_name} - Downloaded: {download_success}")
                 file['downloaded'] = download_success
 
             print(f"File: {file}")
@@ -140,7 +139,7 @@ def log_failed_download(folder_path, failed_download):
     log_file_name = f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}_failed_downloads.txt"
     log_file_path = os.path.join("../.log", log_file_name)
     
-    os.makedirs(".log", exist_ok=True)  # Ensure the logs folder exists
+    os.makedirs("../.log", exist_ok=True)  # Ensure the logs folder exists
     with open(log_file_path, "a") as failed_file:
         failed_file.write(f"{folder_path}, {failed_download}\n")
 
