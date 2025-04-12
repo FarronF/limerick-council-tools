@@ -108,7 +108,7 @@ def process_with_markdownify(pdf_path):
             html_text = re.sub(r'<img[^>]*>', '(Image omitted)', html_text)
             
             markdown_output += md(html_text)
-        markdown_output += "---\n"
+        markdown_output += "\n---\n"
 
     # Post-process the Markdown to remove redundant `****`
     markdown_output = re.sub(r'\*\*\*\*', '', markdown_output)
