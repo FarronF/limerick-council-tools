@@ -136,7 +136,7 @@ def process_with_markdownify(pdf_path):
             img = img.resize((pix.width * 3, pix.height * 3), Image.Resampling.LANCZOS)  # Resize image to 3x the size
             ocr_text = pytesseract.image_to_string(img)
             
-            markdown_output += f"*<small>Scanned page, text may contain errors. See original file for clarity</small>*  \n{ocr_text}\n"
+            markdown_output += f"*<small>Scanned page, text may contain errors. See original file for clarity</small>* \n\n{ocr_text}\n"
         else:
             html_text = page.get_text("html")  # Extract as HTML
             
