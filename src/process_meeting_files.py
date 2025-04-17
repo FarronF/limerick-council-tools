@@ -167,10 +167,10 @@ def log_ocr_usage(pdf_path):
     log_file_name = f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}_ocr_usage.txt"
     log_file_path = os.path.join("../.log", log_file_name)
     
-    os.makedirs(".log", exist_ok=True)  # Ensure the logs folder exists
+    os.makedirs("../.log", exist_ok=True)  # Ensure the logs folder exists
     with open(log_file_path, "a") as failed_file:
         failed_file.write(f"{pdf_path}\n")
 
 input_folder = "../data/meetings/downloaded"
-output_folder = "../data/meetings/processed"
+output_folder = "../limerick-council-meetings/meetings"
 process_meetings(input_folder, output_folder)
