@@ -4,7 +4,6 @@
 __pycache__/
 
 # Virtual environment
-myenv/
 .env/
 
 # VSCode settings

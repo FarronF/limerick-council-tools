@@ -62,10 +62,6 @@ def handle_meetings(meetings, file_filters=None):
         folder_path = f"../data/meetings/downloaded/{datetime.year}/{datetime.month:02d}/{datetime.day:02d}-{folder_name}"
         os.makedirs(folder_path, exist_ok=True)
         
-        json_file_path = os.path.join(folder_path, "meeting_details.json")
-        with open(json_file_path, "w", encoding="utf-8") as json_file:
-            json.dump(meeting, json_file, indent=4, default=str)
-        
         # suffix = meeting['href']
         
         # url = f"{prefix}{suffix}"
@@ -77,47 +73,65 @@ def handle_meetings(meetings, file_filters=None):
         
         links = soup.find_all(
             'a',
-            string=lambda text: text and (not file_filters or any(keyword in text.strip().lower() for keyword in file_filters)),
             href=lambda href: href and href.endswith(".pdf"),
         )
         
-        print(f"Found {len(links)} PDF links for {meeting['meeting_name']}:")
+        files = []
+        for link in links:
+            display_text = link.string.strip() if link.string else "document"
+            file_name = re.sub(r'[\\/*?:"<>|]', "_", display_text) + ".pdf"
+            
+            file = {
+                'display_text': display_text,
+                'file_name': file_name,
+                'url': link.get('href'),
+                'downloaded': False
+            }
+            
+            if not file_filters or any(filter_word.lower() in file_name.lower() for filter_word in file_filters):
+                download_success = download_pdf_to_folder(link, folder_path)
+                file['downloaded'] = download_success
+
+            print(f"File: {file}")
+            files.append(file)
         
-        download_pdfs_to_folder(links, folder_path)
+        meeting['files'] = files
+        json_file_path = os.path.join(folder_path, "meeting_details.json")
+        with open(json_file_path, "w", encoding="utf-8") as json_file:
+            json.dump(meeting, json_file, indent=4, default=str)
 
-
-def download_pdfs_to_folder(links, folder_path):
+def download_pdf_to_folder(link, folder_path):
     # Ensure the folder exists
     os.makedirs(folder_path, exist_ok=True)
     
-    for link in links:
-        url = link.get('href')
+    url = link.get('href')
+    
+    # Get the text content of the link for the filename
+    link_text = str(link.string).strip() if link.string else "document"
+    
+    # Replace invalid characters in the filename
+    safe_filename = re.sub(r'[\\/*?:"<>|]', "_", link_text) + ".pdf"
+    
+    # Full path for the file
+    file_path = os.path.join(folder_path, safe_filename)
+    
+    try:
+        # Download the PDF
+        print(f"Downloading: {url} to {file_path}")
+        response = requests.get(url, stream=True, verify=False)
+        response.raise_for_status()  # Raise an error for bad HTTP responses
         
-        # Get the text content of the link for the filename
-        link_text = str(link.string).strip() if link.string else "document"
+        # Write the PDF to the file
+        with open(file_path, "wb") as file:
+            for chunk in response.iter_content(chunk_size=1024):
+                file.write(chunk)
         
-        # Replace invalid characters in the filename
-        safe_filename = re.sub(r'[\\/*?:"<>|]', "_", link_text) + ".pdf"
-        
-        # Full path for the file
-        file_path = os.path.join(folder_path, safe_filename)
-        
-        try:
-            # Download the PDF
-            print(f"Downloading: {url} to {file_path}")
-            response = requests.get(url, stream=True, verify=False)
-            response.raise_for_status()  # Raise an error for bad HTTP responses
-            
-            # Write the PDF to the file
-            with open(file_path, "wb") as file:
-                for chunk in response.iter_content(chunk_size=1024):
-                    file.write(chunk)
-            
-            print(f"Downloaded: {file_path}")
-        except Exception as e:
-            print(f"\033[91m❌ Failed to download {url}: {e}\033[0m")
-            log_failed_download(folder_path, url)
-
+        print(f"Downloaded: {file_path}")
+    except Exception as e:
+        print(f"\033[91m❌ Failed to download {url}: {e}\033[0m")
+        log_failed_download(folder_path, url)
+        return False
+    return True
 
 # Function to log failed downloads
 def log_failed_download(folder_path, failed_download):
@@ -125,7 +139,7 @@ def log_failed_download(folder_path, failed_download):
     log_file_name = f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}_failed_downloads.txt"
     log_file_path = os.path.join("../.log", log_file_name)
     
-    os.makedirs(".log", exist_ok=True)  # Ensure the logs folder exists
+    os.makedirs("../.log", exist_ok=True)  # Ensure the logs folder exists
     with open(log_file_path, "a") as failed_file:
         failed_file.write(f"{folder_path}, {failed_download}\n")
 
