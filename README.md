@@ -54,10 +54,10 @@ This repository contains tools and utilities designed to assist with tasks relat
 ## Usage
 ### Downloading agendas and minutes
 
-To download meeting files, run the `get_meetings_files.py` script with the following arguments:
+To download meeting files, run the `get_meeting_files.py` script with the following arguments:
 
 ```bash
-python3 get_meetings_files.py
+python3 get_meeting_files.py
 ```
 
 PDFs will be downloaded to meetings/ folder with a structure of {year}/{month}/{day}-{meeting-name}/
@@ -68,7 +68,7 @@ A meeting_details.json will also be generated with some basic details for refere
 
 ### Command-Line Arguments
 
-The script `get_meetings_files.py` supports the following command-line arguments to greater refine or extend the files downloaded:
+The script `get_meeting_files.py` supports the following command-line arguments to greater refine or extend the files downloaded:
 
 - `--start-year` (int, default: 2014): The starting year for downloading meeting files (e.g., `2023`).
 - `--start-month` (int, default: 1): The starting month (1-12).
