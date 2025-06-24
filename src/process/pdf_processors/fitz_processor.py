@@ -22,7 +22,6 @@ class FitzProcessor(PdfProcessorBase):
         doc = fitz.open(pdf_path)
         markdown_output = ""
         ocr_used = False
-        print(f"XYZ Processing PDF: {pdf_path}")
         for page_num in range(len(doc)):
             page = doc[page_num]
             

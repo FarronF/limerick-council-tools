@@ -4,6 +4,7 @@ from src.download.main import download_meeting_files
 from src.process.main import process_meetings
 
 if __name__ == "__main__":
+    script_start_time = datetime.now()
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Download council meeting minutes PDFs.")
     parser.add_argument("--start-year", type=int, default=2014, help="Start year (e.g., 2023)")
@@ -33,6 +34,8 @@ if __name__ == "__main__":
             meeting_filter=args.meeting_filter,
             file_filter=args.file_filter,
             download_location=args.download_location,
+            log_file_folder=args.logs_location,
+            log_file_prefix=f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
         
     if(not args.dont_process):        
@@ -43,6 +46,10 @@ if __name__ == "__main__":
             end_month=args.end_month,
             meeting_filter=args.meeting_filter,
             file_filter=args.file_filter,
+            download_location=args.download_location,
+            output_location=args.output_location,
+            log_file_folder=args.logs_location,
+            log_file_prefix=f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
 
     if(args.delete_downloads_after_complete):

@@ -12,6 +12,7 @@ class PdfProcessorBase(ABC):
         """
         self.ocr_log_file_path = ocr_log_file_path
 
+    # TODO: logging is far too complicated, look at alternatives. Own class?
     def log_ocr_usage(self, pdf_path: str):
         """
         Logs the usage of OCR for a given PDF file.
@@ -19,7 +20,6 @@ class PdfProcessorBase(ABC):
         Args:
             pdf_path (str): The path to the PDF file for which OCR was used.
         """
-        print(f"🔍 OCR used for {pdf_path}")
         
         # Ensure the directory for the log file exists
         os.makedirs(os.path.dirname(self.ocr_log_file_path), exist_ok=True)

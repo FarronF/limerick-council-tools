@@ -6,18 +6,18 @@ from urllib.parse import quote
 
 # Record the script start time
 script_start_time = datetime.now()
-from src.process.meeting_processor import process_meeting
+from src.process.meeting_processor import MeetingProcessor
 
 from typing import List
 
-def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None):
+def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/meetings/downloaded", output_location: str = "./limerick-council-meetings/meetings", log_file_folder: str = ".logs", log_file_prefix: str = None):
     """Processes PDFs, creates folder structure, and generates markdown files."""
     
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    input_folder = os.path.abspath(os.path.join(script_dir, "../../data/meetings/downloaded"))
-    output_folder = os.path.abspath(os.path.join(script_dir, "../../limerick-council-meetings/meetings"))
-
+    input_folder = os.path.abspath(os.path.join(download_location))
+    output_folder = os.path.abspath(os.path.join(output_location))
+    log_file_folder = os.path.abspath(os.path.join(log_file_folder))
+    
+    meeting_processor = MeetingProcessor(log_file_folder=log_file_folder, log_file_name=f"{log_file_prefix}_ocr_usage.log")
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -48,7 +48,7 @@ def process_meetings(start_year: int, start_month: int, end_year: int, end_month
                 meeting_folder_path = os.path.join(month_path, meeting_folder)
                 output_meeting_folder = os.path.join(output_folder, str(year), month_folder, meeting_folder)
                 if os.path.isdir(meeting_folder_path) & (meeting_filter is None or any(filter_word.lower() in meeting_folder.lower() for filter_word in meeting_filter)):                                    
-                    process_meeting(meeting_folder_path, output_meeting_folder, file_filter)
+                    meeting_processor.process_meeting(meeting_folder_path, output_meeting_folder, file_filter)
 
 if __name__ == "__main__":
     # Parse command-line arguments
