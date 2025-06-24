@@ -2,18 +2,19 @@ import os
 import glob
 import fitz
 import json
-from markdownify import markdownify as md
+import argparse
+from typing import List
+from markdownify import markdownify as markdownify
 from PIL import Image
 import pytesseract
 from datetime import datetime
 import re
-from urllib.parse import quote  # Add this import at the top of the file
+from urllib.parse import quote
 
 # Record the script start time
 script_start_time = datetime.now()
 
-# Define the template as a separate variable
-README_TEMPLATE = """# Meeting Details
+MEETING_README_TEMPLATE = """# Meeting Details
 
 **Meeting Name:** {meeting_name}
 
@@ -25,41 +26,62 @@ Files:
 
 """
 
-def process_meetings(input_folder, output_folder):
+from typing import List
+
+def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None):
     """Processes PDFs, creates folder structure, and generates markdown files."""
-    input_folder = os.path.abspath(input_folder)
-    output_folder = os.path.abspath(output_folder)
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    input_folder = os.path.join(script_dir, "../data/meetings/downloaded")
+    output_folder = os.path.join(script_dir, "../limerick-council-meetings/meetings")
+
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-
-    for year_folder in sorted(os.listdir(input_folder)):
         
-        year_path = os.path.join(input_folder, year_folder)
-        if os.path.isdir(year_path):
-            for month_folder in sorted(os.listdir(year_path)):
-                month_path = os.path.join(year_path, month_folder)
-                if os.path.isdir(month_path):
-                    for meeting_folder in sorted(os.listdir(month_path)):
-                        meeting_path = os.path.join(month_path, meeting_folder)
-                        if os.path.isdir(meeting_path):
-                            process_meeting(meeting_path, output_folder)
+    for year in range(start_year, end_year + 1):
+        year_path = os.path.join(input_folder, str(year))
+        if not os.path.exists(year_path):
+            print(f"Year folder {year_path} does not exist, skipping year {year}.")
+            continue
+        
+        if year == start_year:
+            start_month_range = start_month
+        else:
+            start_month_range = 1
+            
+        if year == end_year:
+            end_month_range = end_month
+        else:
+            end_month_range = 12
 
-def process_meeting(meeting_folder, output_folder):
+        for month in range(start_month_range, end_month_range + 1):
+            month_folder = f"{month:02d}"
+            month_path = os.path.join(year_path, month_folder)
+            if not os.path.exists(month_path):
+                print(f"Month folder {month_path} does not exist, skipping month {month}.")
+                continue
+            for meeting_folder in sorted(os.listdir(month_path)):
+                meeting_path = os.path.join(month_path, meeting_folder)
+                if os.path.isdir(meeting_path) & (meeting_filter is None or any(filter_word.lower() in meeting_folder.lower() for filter_word in meeting_filter)):                                    
+                    process_meeting(meeting_path, output_folder, file_filter)
+
+def process_meeting(meeting_folder: str, output_folder: str, file_filter: List[str] = None):
     """Processes a single meeting folder and generates markdown files."""
     print(f"👥 Processing meeting: {meeting_folder}")
     meeting_details_path = os.path.join(meeting_folder, "meeting_details.json")
     if os.path.exists(meeting_details_path):
         with open(meeting_details_path, "r", encoding="utf-8") as details_file:
             meeting_details = json.load(details_file)
-            relative_path = os.path.relpath(meeting_folder, input_folder)
+            relative_path = os.path.relpath(meeting_folder, "../data/meetings/downloaded")
             output_meeting_folder = os.path.join(output_folder, relative_path)
 
         if not os.path.exists(output_meeting_folder):
             os.makedirs(output_meeting_folder)
 
         # Create a README.md file content for the meeting
-        readme_content = README_TEMPLATE.format(
+        readme_content = MEETING_README_TEMPLATE.format(
             meeting_name=meeting_details["meeting_name"],
             datetime=meeting_details["datetime"],
             href=meeting_details["href"]
@@ -80,7 +102,7 @@ def process_meeting(meeting_folder, output_folder):
             processed = False
             md_file_name = None
             
-            if downloaded:
+            if downloaded & (file_name.endswith(".pdf")) & (file_filter is None or any(filter_word.lower() in file_name.lower() for filter_word in file_filter)):
                 pdf_file_path = os.path.join(meeting_folder, file_name)
                 if os.path.exists(pdf_file_path):
                     processed = process_pdf(pdf_file_path, output_meeting_folder, file_url)
@@ -133,17 +155,17 @@ def process_with_markdownify(pdf_path):
                 ocr_used = True
             pix = page.get_pixmap()  # Render page as an image
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-            img = img.resize((pix.width * 3, pix.height * 3), Image.Resampling.LANCZOS)  # Resize image to 3x the size
+            img = img.resize((pix.width * 3, pix.height * 3), Image.Resampling.LANCZOS)
             ocr_text = pytesseract.image_to_string(img)
             
-            markdown_output += f"*<small>Scanned page, text may contain errors. See original file for clarity</small>* \n\n{ocr_text}\n"
+            markdown_output += f"*<small>Scanned page, text may contain errors. See original file for clarity</small>*  \n\n{ocr_text}\n"
         else:
-            html_text = page.get_text("html")  # Extract as HTML
+            html_text = page.get_text("html")
             
             # Replace <img> tags with a placeholder
             html_text = re.sub(r'<img[^>]*>', '(Image omitted)', html_text)
             
-            markdown_output += md(html_text)
+            markdown_output += markdownify(html_text)
         markdown_output += "\n---\n"
 
     # Post-process the Markdown to remove redundant `****`
@@ -160,7 +182,6 @@ def save_markdown(markdown_content, pdf_path, output_folder):
     with open(output_md_path, "w", encoding="utf-8") as md_file:
         md_file.write(markdown_content)
 
-# Function to log failed downloads
 def log_ocr_usage(pdf_path):
     print(f"🔍 OCR used for {pdf_path}")
     # Generate the log file name based on the script start time
@@ -170,7 +191,17 @@ def log_ocr_usage(pdf_path):
     os.makedirs("../.log", exist_ok=True)  # Ensure the logs folder exists
     with open(log_file_path, "a") as failed_file:
         failed_file.write(f"{pdf_path}\n")
-
-input_folder = "../data/meetings/downloaded"
-output_folder = "../limerick-council-meetings/meetings"
-process_meetings(input_folder, output_folder)
+if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Parse council meeting minutes PDFs to markdown.")
+    parser.add_argument("--start-year", type=int, default=2014, help="Start year (e.g., 2023)")
+    parser.add_argument("--start-month", type=int, default=1, help="Start month (1-12)")
+    parser.add_argument("--end-year", type=int, default=datetime.now().year, help="End year (e.g., 2024)")
+    parser.add_argument("--end-month", type=int, default=datetime.now().month, help="End month (1-12)")
+    parser.add_argument("--meeting-filter", nargs='+', type=str, default=None, help="Filter meetings by names (case insensitive, e.g., 'council budget')")
+    parser.add_argument("--file-filter", nargs='*', type=str, default=None, help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter' with no arguments to disable filtering.")
+    args = parser.parse_args()
+    
+    process_meetings(args.start_year, args.start_month, args.end_year, args.end_month, args.meeting_filter, args.file_filter)
+    
+    

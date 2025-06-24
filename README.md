@@ -57,18 +57,18 @@ This repository contains tools and utilities designed to assist with tasks relat
 To download meeting files, run the `get_meeting_files.py` script with the following arguments:
 
 ```bash
-python3 get_meeting_files.py
+python3 src/get_meeting_files.py
 ```
 
-PDFs will be downloaded to meetings/ folder with a structure of {year}/{month}/{day}-{meeting-name}/
+PDFs will be downloaded to data/meetings/downloaded folder with a structure of {year}/{month}/{day}-{meeting-name}/
 
 All files with Agenda or Minutes in their name will be downloaded by default.
 
 A meeting_details.json will also be generated with some basic details for reference.
 
-### Command-Line Arguments
+#### Command-Line Arguments
 
-The script `get_meeting_files.py` supports the following command-line arguments to greater refine or extend the files downloaded:
+The script `src/get_meeting_files.py` supports the following command-line arguments to greater refine or extend the files downloaded:
 
 - `--start-year` (int, default: 2014): The starting year for downloading meeting files (e.g., `2023`).
 - `--start-month` (int, default: 1): The starting month (1-12).
@@ -82,6 +82,36 @@ Example usage:
 ```bash
 python3 get_meetings_files.py --start-year 2020 --start-month 6 --end-year 2023 --end-month 12 --meeting-filter "council" "budget" --file-filter "agenda"
 ```
+
+### Process Meeting Files to Markdown
+
+To process meeting files, run the `process_meeting_files.py` script with the following arguments:
+
+```bash
+python3 src/process_meeting_files.py
+```
+
+Meetings in the data/meetings/downloaded folder will be processed, meetings are assumed to be in a folder with structure {year}/{month}/{day}-{meeting-name}/
+
+PDFs for these meetings will be parsed to extract the text and converted to markdown. Files containing the extracted text as markdown along with a README.md summary of the meeting details will be saved to limerick-counil-meetings/meetings folder with the same sub folder structure.
+
+#### Command-Line Arguments
+
+The script `process_meeting_files.py` supports the following command-line arguments to greater refine or extend the files downloaded:
+
+- `--start-year` (int, default: 2014): The starting year for downloading meeting files (e.g., `2023`).
+- `--start-month` (int, default: 1): The starting month (1-12).
+- `--end-year` (int, default: current year): The ending year for downloading meeting files (e.g., `2024`).
+- `--end-month` (int, default: current month): The ending month (1-12).
+- `--meeting-filter` (list of str, optional): Filter meetings by names (case insensitive, e.g., `council budget`).
+- `--file-filter` (list of str, optional): Filter files by names (case insensitive, e.g., `agenda minutes`).
+
+Example usage:
+
+```bash
+python3 src/process_meetings_files.py --start-year 2020 --start-month 6 --end-year 2023 --end-month 12 --meeting-filter "council" "budget" --file-filter "agenda"
+```
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
