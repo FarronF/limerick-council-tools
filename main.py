@@ -45,3 +45,11 @@ if __name__ == "__main__":
             file_filter=args.file_filter,
         )
 
+    if(args.delete_downloads_after_complete):
+        import shutil
+        import os
+        if os.path.exists(args.download_location):
+            print(f"Removing download location {args.download_location}")
+            shutil.rmtree(args.download_location)
+        else:
+            print(f"Download location {args.download_location} does not exist, skipping deletion.")
