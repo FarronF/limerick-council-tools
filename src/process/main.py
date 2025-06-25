@@ -10,7 +10,7 @@ from src.process.meeting_processor import MeetingProcessor
 
 from typing import List
 
-def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/meetings/downloaded", output_location: str = "./limerick-council-meetings/meetings"):
+def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded", output_location: str = "./data/processed"):
     """Processes PDFs, creates folder structure, and generates markdown files."""
     
     input_folder = os.path.abspath(os.path.join(download_location))

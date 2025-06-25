@@ -1,0 +1,14 @@
+.git/
+.vscode/
+*.log
+*.tmp
+__pycache__/
+*.pyc
+*.pyo
+
+.env/
+.vscode/
+.logs/
+data/
+limerick-council-meetings/
+Dockerfile
