@@ -9,7 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
 
 
-def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/meetings/downloaded"):
+def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded"):
     print(f"Fetching meeting minutes from {start_year}-{start_month} to {end_year}-{end_month}...")
     if meeting_filter:
         print(f"Filtering meetings by name containing: '{meeting_filter}' (case insensitive)")
