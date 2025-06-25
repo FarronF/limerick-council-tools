@@ -7,15 +7,6 @@ from src.process.pdf_processors.pdf_processor_base import PdfProcessorBase
 
 # TODO: Split text processing, OCR processing, and Markdown conversion into separate classes
 class FitzProcessor(PdfProcessorBase):
-    def __init__(self, ocr_log_file_path: str):
-        """
-        Initialize the FitzProcessor with an OCR log file path.
-
-        Args:
-            ocr_log_file_path (str): The path to the OCR log file.
-        """
-        super().__init__(ocr_log_file_path)
-
     def process(self, pdf_path: str):
         """Extracts text from a PDF using PyMuPDF and converts it to Markdown with markdownify.
         Includes OCR for scanned PDFs."""
@@ -29,7 +20,6 @@ class FitzProcessor(PdfProcessorBase):
                 if not ocr_used: # Only log OCR usage once per PDF
                     self.log_ocr_usage(pdf_path)
                     ocr_used = True
-                print(f"🔍 OCR used for {pdf_path} on page {page_num + 1}")
                 pix = page.get_pixmap()  # Render page as an image
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
                 img = img.resize((pix.width * 3, pix.height * 3), Image.Resampling.LANCZOS)

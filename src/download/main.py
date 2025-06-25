@@ -9,7 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
 
 
-def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/meetings/downloaded", log_file_folder: str = ".logs", log_file_prefix: str = None):
+def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/meetings/downloaded"):
     print(f"Fetching meeting minutes from {start_year}-{start_month} to {end_year}-{end_month}...")
     if meeting_filter:
         print(f"Filtering meetings by name containing: '{meeting_filter}' (case insensitive)")
@@ -19,7 +19,7 @@ def download_meeting_files(start_year: int, start_month: int, end_year: int, end
     start_date = datetime(start_year, start_month, 1)
     end_date = datetime(end_year, end_month, 1) # Using first date will still include the entire month
     current_date = start_date
-    downloader = MeetingFilesDownloader(destination_folder = download_location, log_file_folder=log_file_folder, log_file_name=f"{log_file_prefix}_failed_downloads.txt")
+    downloader = MeetingFilesDownloader(destination_folder = download_location)
     
 
     while current_date <= end_date:
