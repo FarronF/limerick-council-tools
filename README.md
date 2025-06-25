@@ -1,6 +1,9 @@
 # Limerick Council Tools
 
 This repository contains tools and utilities designed to assist with tasks related to Limerick Council operations.
+
+This is used to generate the meeting files in [Limerick Council Meetings](https://github.com/FarronF/limerick-council-meetings)
+
 ## Features
 
 - **Meeting PDF Downloads and Parsing**: Script for downloading PDFs from all public meetings in a range of dates and parsing the contents to export to markdown.
