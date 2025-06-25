@@ -18,11 +18,6 @@ Files:
 """
 
 class MeetingProcessor:
-    def __init__(self, log_file_folder: str = None, log_file_name: str = 'ocr_log.log'):
-        print(f"QQQ {log_file_folder}")
-        self.log_file_path = Path(log_file_folder) / log_file_name
-        print(f"PPP {self.log_file_path}")
-        
     def process_meeting(self, meeting_folder: str, output_meeting_folder: str, file_filter: List[str] = None):
         """Processes a single meeting folder and generates markdown files."""
         print(f"👥 Processing meeting: {meeting_folder}")
@@ -77,11 +72,10 @@ class MeetingProcessor:
     def _process_pdf(self, pdf_path, output_folder, original_url):
         print(f"📄 Processing PDF: {os.path.basename(pdf_path)}")
         try:
-            fitz_processor = FitzProcessor(ocr_log_file_path = self.log_file_path)
+            fitz_processor = FitzProcessor()
             markdown_output = fitz_processor.process(pdf_path)
             if markdown_output:
                 markdown_output = f"[Original file]({original_url})\n\n---\n" + markdown_output
-                print(f"OUTPUT FOLDER: {output_folder}")
                 self._save_markdown(markdown_output, pdf_path, output_folder)
             else:
                 print(f"No content extracted from {pdf_path}.")
@@ -93,10 +87,7 @@ class MeetingProcessor:
 
 
     def _save_markdown(self, markdown_content, pdf_path, output_folder):
-        """Saves the Markdown content to a file"""
-        
-        print(f"📄 Saving Markdown content for {os.path.basename(pdf_path)} to {output_folder}")
-        
+        """Saves the Markdown content to a file"""        
         output_md_path = os.path.join(
             output_folder, f"{os.path.splitext(os.path.basename(pdf_path))[0]}.md"
         )

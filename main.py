@@ -2,6 +2,7 @@ import argparse
 from datetime import datetime
 from src.download.main import download_meeting_files
 from src.process.main import process_meetings
+from src.logging.file_logger import FileLoggerSingleton
 
 if __name__ == "__main__":
     script_start_time = datetime.now()
@@ -24,7 +25,12 @@ if __name__ == "__main__":
     # Handle disabling file filter
     if not args.file_filter:  # If file-filter is provided with no arguments
         args.file_filter = None
-
+    
+    
+    run_id = script_start_time.strftime('%Y-%m-%d_%H-%M-%S')
+    logs_folder = args.logs_location
+    FileLoggerSingleton(run_id, logs_folder) 
+    
     if(not args.dont_download):        
         download_meeting_files(
             start_year=args.start_year,
@@ -34,8 +40,6 @@ if __name__ == "__main__":
             meeting_filter=args.meeting_filter,
             file_filter=args.file_filter,
             download_location=args.download_location,
-            log_file_folder=args.logs_location,
-            log_file_prefix=f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
         
     if(not args.dont_process):        
@@ -48,8 +52,6 @@ if __name__ == "__main__":
             file_filter=args.file_filter,
             download_location=args.download_location,
             output_location=args.output_location,
-            log_file_folder=args.logs_location,
-            log_file_prefix=f"{script_start_time.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
 
     if(args.delete_downloads_after_complete):
