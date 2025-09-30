@@ -33,4 +33,6 @@ class FitzProcessor(PdfProcessorBase):
                 markdown_output += markdownify(html_text)
             markdown_output += "\n---\n"
         # Post-process the Markdown to remove redundant `****`
+        # TODO Find a more robust solution
+        markdown_output = re.sub(r'\*\*\*\*', '', markdown_output)
         return markdown_output
