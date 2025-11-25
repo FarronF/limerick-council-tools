@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import List
 from urllib.parse import quote
-from src.process.pdf_processors.fitz_processor import FitzProcessor
+from src.pdf_parser.process.pdf_processors.fitz_processor import FitzProcessor
 
 MEETING_README_TEMPLATE = """# Meeting Details
 

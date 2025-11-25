@@ -4,8 +4,8 @@ import json
 from typing import List
 from bs4 import BeautifulSoup
 
-from src.download.fetch_web_content import fetch_web_content
-from src.types.meeting_details import MeetingDetails
+from src.pdf_parser.download.fetch_web_content import fetch_web_content
+from src.pdf_parser.types.meeting_details import MeetingDetails
 
 def get_public_meetings_for_year_month(year: int, month:int, meeting_filter_keywords: List[str] = None) -> List[MeetingDetails]:
     calendar_ajax_url = f"https://www.limerick.ie/views/ajax?view_name=council_meetings_calendar&view_display_id=page_month&view_args={year}{month:02d}"

@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from abc import ABC, abstractmethod
 
-from src.logging.file_logger import FileLoggerSingleton
+from src.pdf_parser.logging.file_logger import FileLoggerSingleton
 
 class PdfProcessorBase(ABC):
     def log_ocr_usage(self, pdf_path: str):

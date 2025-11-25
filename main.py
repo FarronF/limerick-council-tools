@@ -1,8 +1,8 @@
 import argparse
 from datetime import datetime
-from src.download.main import download_meeting_files
-from src.process.main import process_meetings
-from src.logging.file_logger import FileLoggerSingleton
+from src.pdf_parser.download.main import download_meeting_files
+from src.pdf_parser.process.main import process_meetings
+from src.pdf_parser.logging.file_logger import FileLoggerSingleton
 
 if __name__ == "__main__":
     script_start_time = datetime.now()

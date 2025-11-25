@@ -3,8 +3,8 @@ from datetime import datetime
 import urllib3
 from typing import List
 
-from src.download.get_meetings_from_website import get_public_meetings_for_year_month
-from src.download.meeting_files_downloader import MeetingFilesDownloader
+from shared.get_meetings_from_website import get_public_meetings_for_year_month
+from src.pdf_parser.download.meeting_files_downloader import MeetingFilesDownloader
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
 

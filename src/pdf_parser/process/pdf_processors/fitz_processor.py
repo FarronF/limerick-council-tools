@@ -3,7 +3,7 @@ from markdownify import markdownify as markdownify
 from PIL import Image
 import pytesseract
 import fitz  # PyMuPDF
-from src.process.pdf_processors.pdf_processor_base import PdfProcessorBase 
+from src.pdf_parser.process.pdf_processors.pdf_processor_base import PdfProcessorBase 
 
 # TODO: Split text processing, OCR processing, and Markdown conversion into separate classes
 class FitzProcessor(PdfProcessorBase):

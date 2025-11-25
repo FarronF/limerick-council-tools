@@ -4,10 +4,10 @@ import re
 from pathlib import Path
 from typing import List
 from bs4 import BeautifulSoup
-from src.logging.file_logger import FileLoggerSingleton
-from src.download.fetch_web_content import fetch_web_content
-from src.download.pdf_downloader import download_pdf_to_folder
-from src.types.meeting_details import MeetingDetails
+from src.pdf_parser.logging.file_logger import FileLoggerSingleton
+from src.pdf_parser.download.fetch_web_content import fetch_web_content
+from src.pdf_parser.download.pdf_downloader import download_pdf_to_folder
+from src.pdf_parser.types.meeting_details import MeetingDetails
 
 class MeetingFilesDownloader:
     def __init__(self, destination_folder: str = None):

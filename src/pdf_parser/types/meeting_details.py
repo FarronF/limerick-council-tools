@@ -1,5 +1,5 @@
 from typing import List, TypedDict
-from src.types.file_details import FileDetails
+from src.pdf_parser.types.file_details import FileDetails
 
 class MeetingDetails(TypedDict):
     name: str
