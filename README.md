@@ -11,42 +11,50 @@ This is used to generate the meeting files in [Limerick Council Meetings](https:
 ## Installation
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/farronf/limerick-council-tools.git
-    ```
+   ```bash
+   git clone https://github.com/farronf/limerick-council-tools.git
+   ```
 2. Navigate to the project directory:
-    ```bash
-    cd limerick-council-tools
-    ```
+   ```bash
+   cd limerick-council-tools
+   ```
+
 ## Quick Start With Docker
+
 Install Docker Desktop from [Docker's official website](https://www.docker.com/products/docker-desktop).
 
 Once installed:
 
 Build the docker image
+
 ```bash
 docker build -t limerick-council-tools .
 ```
 
 Run the image in a docker container. The following command will run in interactive mode with the shell inside the container. If you wish to access the downloaded/processed files outside of the Docker container make sure to update the /your/local/data section with a valid destination.
+
 ```bash
 docker run -it --rm -v /your/local/data:/app/data limerick-council-tools sh
 ```
 
 If access outside the container is not needed it can be run without the volume. All data will be lost when the container is stopped in this case.
+
 ```bash
 docker run -it --rm limerick-council-tools sh
 ```
 
-When finished to exit docker enter: 
+When finished to exit docker enter:
+
 ```bash
 exit
 ```
 
 ## Usage
+
 Once docker is running in interactive mode
 
 To download and process all meetings agenda and minutes files call
+
 ```bash
 python3 main.py
 ```
@@ -85,50 +93,63 @@ python3 main.py --start-year 2020 --start-month 6 --end-year 2023 --end-month 12
 ```
 
 ## Alternative Setup for local development
+
 If you are making changes to code this might be preferable to Docker.
 
 ### Prepare Development Environment
 
 1. Install Python 3:
-
-    - On Linux:
-        ```bash
-        sudo apt-get install python3
-        ```
-    - On Windows:  
-      Download and install Python from [python.org](https://www.python.org/downloads/).  
-      Make sure to check "Add Python to PATH" during installation.
+   - On Linux:
+     ```bash
+     sudo apt-get install python3
+     ```
+   - On Windows:  
+     Download and install Python from [python.org](https://www.python.org/downloads/).  
+     Make sure to check "Add Python to PATH" during installation.
 
 2. Install `python3-venv`:
+   - On Linux:
+     ```bash
+     sudo apt-get install python3-venv
+     ```
+   - On Windows:  
+     The `venv` module is included by default with Python 3.3 and above. No extra installation is needed.
 
-    - On Linux:
-        ```bash
-        sudo apt-get install python3-venv
-        ```
-    - On Windows:  
-      The `venv` module is included by default with Python 3.3 and above. No extra installation is needed.
+3. Install Tesseract OCR Engine:
+   _Required by PDF parsing tools (e.g., `markdownify` / `pytesseract`) to extract text from documents._
+   - On Linux (Debian/Ubuntu):
+
+     ```bash
+     sudo apt-get install tesseract-ocr
+     ```
+
+   - On Windows:
+     1. Download and run the 64-bit installer from the [UB-Mannheim Tesseract Wiki](https://github.com/UB-Mannheim/tesseract/wiki).
+     2. Install using the default directory (`C:\Program Files\Tesseract-OCR`).
+     3. Add `C:\Program Files\Tesseract-OCR` to your System Environment Variables under `PATH
 
 ### Create and Activate Virtual Environment
 
 1. Create a virtual environment:
-    ```bash
-    python3 -m venv .env
-    ```
+
+   ```bash
+   python3 -m venv .env
+   ```
 
 2. Activate the virtual environment:
-    - On Linux/MacOS:
-        ```bash
-        source .env/bin/activate
-        ```
-    - On Windows:
-        ```bash
-        .env\Scripts\activate
-        ```
+   - On Linux/MacOS:
+     ```bash
+     source .env/bin/activate
+     ```
+   - On Windows:
+     ```bash
+     .env\Scripts\activate
+     ```
 
 3. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Contributing
 
@@ -136,17 +157,17 @@ Contributions are welcome! Please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch:
-    ```bash
-    git checkout -b feature-name
-    ```
+   ```bash
+   git checkout -b feature-name
+   ```
 3. Commit your changes:
-    ```bash
-    git commit -m "Add feature-name"
-    ```
+   ```bash
+   git commit -m "Add feature-name"
+   ```
 4. Push to your branch:
-    ```bash
-    git push origin feature-name
-    ```
+   ```bash
+   git push origin feature-name
+   ```
 5. Open a pull request.
 
 ## License
