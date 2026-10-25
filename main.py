@@ -19,6 +19,8 @@ if __name__ == "__main__":
     parser.add_argument("--logs-location", type=str, default="./.logs", help="Location to output logs")
     parser.add_argument("--dont-download", action="store_true", help="Do no download new files, process existing files only")
     parser.add_argument("--dont-process", action="store_true", help="Do not process files to markdown")
+    parser.add_argument("--redownload-existing", action="store_true", help="Download PDFs again even when the local file already exists")
+    parser.add_argument("--reprocess-existing", action="store_true", help="Regenerate Markdown even when the output already exists")
     parser.add_argument("--delete-downloads-after-complete", action="store_true", help="Delete downloaded files after processing")
     args = parser.parse_args()
 
@@ -40,6 +42,7 @@ if __name__ == "__main__":
             meeting_filter=args.meeting_filter,
             file_filter=args.file_filter,
             download_location=args.download_location,
+            redownload_existing=args.redownload_existing,
         )
         
     if(not args.dont_process):        
@@ -52,6 +55,7 @@ if __name__ == "__main__":
             file_filter=args.file_filter,
             download_location=args.download_location,
             output_location=args.output_location,
+            reprocess_existing=args.reprocess_existing,
         )
 
     if(args.delete_downloads_after_complete):

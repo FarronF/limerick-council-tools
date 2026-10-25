@@ -9,7 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
 
 
-def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded"):
+def download_meeting_files(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded", redownload_existing: bool = False):
     print(f"Fetching meeting minutes from {start_year}-{start_month} to {end_year}-{end_month}...")
     if meeting_filter:
         print(f"Filtering meetings by name containing: '{meeting_filter}' (case insensitive)")
@@ -24,7 +24,7 @@ def download_meeting_files(start_year: int, start_month: int, end_year: int, end
 
     while current_date <= end_date:
         meetings = get_public_meetings_for_year_month(current_date.year, current_date.month, meeting_filter)
-        downloader.download_meeting_files_from_website(meetings, file_filter)
+        downloader.download_meeting_files_from_website(meetings, file_filter, redownload_existing)
         current_date = _add_month(current_date)
     
     
@@ -44,6 +44,7 @@ if __name__ == "__main__":
     parser.add_argument("--end-month", type=int, default=datetime.now().month, help="End month (1-12)")
     parser.add_argument("--meeting-filter", nargs='+', type=str, default=None, help="Filter meetings by names (case insensitive, e.g., 'council budget')")
     parser.add_argument("--file-filter", nargs='*', type=str, default=["agenda", "minutes"], help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter' with no arguments to disable filtering.")
+    parser.add_argument("--redownload-existing", action="store_true", help="Download PDFs again even when the local file already exists")
     args = parser.parse_args()
 
     if not args.file_filter:  # If file-filter is provided with no arguments
@@ -56,4 +57,5 @@ if __name__ == "__main__":
         end_month=args.end_month,
         meeting_filter=args.meeting_filter,
         file_filter=args.file_filter,
+        redownload_existing=args.redownload_existing,
     )

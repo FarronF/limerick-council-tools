@@ -62,6 +62,7 @@ python3 main.py
 PDFs will be downloaded to data/meetings/downloaded folder with a structure of {year}/{month}/{day}-{meeting-name}/
 
 All files with Agenda or Minutes in their name will be downloaded by default.
+Existing PDFs and Markdown outputs are skipped by default so repeated runs only download or process missing files.
 
 A meeting_details.json will also be generated with some basic details for reference.
 
@@ -84,6 +85,8 @@ The script `main.py` supports the following command-line arguments to greater re
 - `--logs-location` (str, default: `./.logs`): Location to output logs.
 - `--dont-download` (flag): Do not download new files, process existing files only.
 - `--dont-process` (flag): Do not process files to markdown, only download.
+- `--redownload-existing` (flag): Download matching PDFs again even if their local files already exist. By default, existing PDFs are skipped.
+- `--reprocess-existing` (flag): Regenerate Markdown for matching PDFs even if the output already exists. By default, existing Markdown files are skipped.
 - `--delete-downloads-after-complete` (flag): Delete downloaded files after processing. Note: This will delete all files in download-location not just files that were downloaded
 
 Example usage:

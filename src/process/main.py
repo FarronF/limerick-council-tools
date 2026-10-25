@@ -10,7 +10,7 @@ from src.process.meeting_processor import MeetingProcessor
 
 from typing import List
 
-def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded", output_location: str = "./data/processed"):
+def process_meetings(start_year: int, start_month: int, end_year: int, end_month: int, meeting_filter: List[str] = None, file_filter: List[str] = None, download_location: str = "./data/downloaded", output_location: str = "./data/processed", reprocess_existing: bool = False):
     """Processes PDFs, creates folder structure, and generates markdown files."""
     
     input_folder = os.path.abspath(os.path.join(download_location))
@@ -47,7 +47,7 @@ def process_meetings(start_year: int, start_month: int, end_year: int, end_month
                 meeting_folder_path = os.path.join(month_path, meeting_folder)
                 output_meeting_folder = os.path.join(output_folder, str(year), month_folder, meeting_folder)
                 if os.path.isdir(meeting_folder_path) & (meeting_filter is None or any(filter_word.lower() in meeting_folder.lower() for filter_word in meeting_filter)):                                    
-                    meeting_processor.process_meeting(meeting_folder_path, output_meeting_folder, file_filter)
+                    meeting_processor.process_meeting(meeting_folder_path, output_meeting_folder, file_filter, reprocess_existing)
 
 if __name__ == "__main__":
     # Parse command-line arguments
@@ -58,8 +58,9 @@ if __name__ == "__main__":
     parser.add_argument("--end-month", type=int, default=datetime.now().month, help="End month (1-12)")
     parser.add_argument("--meeting-filter", nargs='+', type=str, default=None, help="Filter meetings by names (case insensitive, e.g., 'council budget')")
     parser.add_argument("--file-filter", nargs='*', type=str, default=None, help="Filter files by names (case insensitive, e.g., 'agenda minutes'). Use '--file-filter' with no arguments to disable filtering.")
+    parser.add_argument("--reprocess-existing", action="store_true", help="Regenerate Markdown even when the output already exists")
     args = parser.parse_args()
     
-    process_meetings(args.start_year, args.start_month, args.end_year, args.end_month, args.meeting_filter, args.file_filter)
+    process_meetings(args.start_year, args.start_month, args.end_year, args.end_month, args.meeting_filter, args.file_filter, reprocess_existing=args.reprocess_existing)
     
     

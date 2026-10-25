@@ -5,16 +5,14 @@ import re
 import requests
 
 
-def download_pdf_to_folder(link: str, folder_path: Path):
+def download_pdf_to_folder(link: str, folder_path: Path, file_name: str = None):
     # Ensure the folder exists
     os.makedirs(folder_path, exist_ok=True)
     
     url = link.get('href')
     
     link_text = str(link.string).strip() if link.string else "document"
-    
-    # Replace invalid characters in the filename
-    safe_filename = re.sub(r'[\\/*?:"<>|]', "_", link_text) + ".pdf"
+    safe_filename = file_name or (re.sub(r'[\\/*?:"<>|]', "_", link_text) + ".pdf")
     
     file_path = os.path.join(folder_path, safe_filename)
     
